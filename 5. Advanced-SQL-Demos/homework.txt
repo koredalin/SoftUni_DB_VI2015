@@ -1,0 +1,218 @@
+﻿4. Advanced SQL Homework 
+1.)Problem 1.	Write a SQL query to find the names and salaries of the employees that take the minimal salary in the company.
+SELECT FirstName, LastName, Salary 
+	FROM Employees 
+	WHERE Salary = (SELECT Min(Salary) FROM Employees)
+	
+2.) Problem 2.	Write a SQL query to find the names and salaries of the employees that have a salary that is up to 10% higher than the minimal salary for the company.SELECT FirstName, LastName, Salary 
+	FROM Employees 
+	WHERE Salary <= (SELECT (Min(Salary) * 1.1) FROM Employees)
+	
+3.) Problem 3.	Write a SQL query to find the full name, salary and department of the employees that take the minimal salary in their department.
+SELECT (e.FirstName + ' ' + e.LastName) AS  FullName, e.Salary, d.Name
+	FROM Employees AS e 
+	INNER JOIN Departments AS d 
+		ON e.DepartmentID = d.DepartmentID 
+	WHERE Salary = 
+		(SELECT MIN(Salary) FROM Employees 
+		WHERE DepartmentID = e.DepartmentID)
+	ORDER BY d.Name ASC
+3.1) Get full name in one column
+SELECT (FirstName + ' ' + LastName) AS  FullName 
+	FROM Employees 
+	
+4.) Problem 4.	Write a SQL query to find the average salary in the department #1.
+SELECT AVG(Salary) AS AverageSalary
+	FROM Employees 
+	WHERE DepartmentID = 1
+	
+5.) Problem 5.	Write a SQL query to find the average salary in the "Sales" department.
+SELECT AVG(Salary) AS AverageSalaryForSalesDepartment
+	FROM Employees 
+	WHERE DepartmentID IN 
+		(SELECT e.DepartmentID
+			FROM Employees AS e 
+			INNER JOIN Departments AS d 
+				ON e.DepartmentID = d.DepartmentID 
+			WHERE d.Name = 'Sales')
+			
+6.) Problem 6.	Write a SQL query to find the number of employees in the "Sales" department.
+SELECT COUNT(DepartmentID) AS SalesEmployeesCount 
+	FROM Employees 
+	WHERE DepartmentID IN 
+		(SELECT e.DepartmentID
+			FROM Employees AS e 
+			INNER JOIN Departments AS d 
+				ON e.DepartmentID = d.DepartmentID 
+			WHERE d.Name = 'Sales')
+			
+7.) Problem 7.	Write a SQL query to find the number of all employees that have manager.
+SELECT COUNT(EmployeeID) AS EmployeesWithManager 
+	FROM Employees 
+	WHERE ManagerID IS NOT NULL
+	
+8.) Problem 8.	Write a SQL query to find the number of all employees that have no manager.
+SELECT COUNT(EmployeeID) AS EmployeesWithoutManager 
+	FROM Employees 
+	WHERE ManagerID IS NULL
+	
+9.) Problem 9.	Write a SQL query to find all departments and the average salary for each of them.
+SELECT d.Name, AVG(e.Salary) AS AverageSalary 
+	FROM Departments AS d 
+	LEFT JOIN Employees AS e 
+		ON d.DepartmentID = e.DepartmentID
+	GROUP BY d.Name 
+	ORDER by d.Name
+	
+10.) Problem 10.	Write a SQL query to find the count of all employees in each department and for each town.
+SELECT t.Name, d.Name, COUNT(e.EmployeeID) AS EmployessCount 
+	FROM Towns AS t 
+	INNER JOIN Addresses AS addr 
+		ON t.TownID = addr.TownID
+	INNER JOIN Employees AS e
+		ON addr.AddressID = e.AddressID 
+	INNER JOIN Departments AS d  
+		ON e.DepartmentID = d.DepartmentID
+	GROUP BY t.Name, d.Name
+	ORDER by t.Name
+	
+11.) Problem 11.	Write a SQL query to find all managers that have exactly 5 employees.
+SELECT m.FirstName, 
+		m.LastName, 
+		COUNT(e.EmployeeID) AS [EmployeesCount] 
+	FROM Employees AS m 
+	INNER JOIN Employees AS e 
+		ON m.ManagerID = e.ManagerID
+	GROUP BY m.FirstName, m.LastName 
+	HAVING COUNT(e.EmployeeID) = 5
+	
+12.) Problem 12.	Write a SQL query to find all employees along with their managers.
+SELECT (e.FirstName + ' ' + e.LastName) AS  EmployeeFullName, 
+		(m.FirstName + ' ' + m.LastName) AS  ManagerFullName 
+	FROM Employees AS e 
+	LEFT JOIN Employees AS m 
+		ON e.ManagerID = m.ManagerID 
+	ORDER BY EmployeeFullName
+--------------------------------------
+SELECT (e.FirstName + ' ' + e.LastName) AS  EmployeeFullName,
+		ISNULL((m.FirstName + ' ' + m.LastName), '(no manager)') AS  ManagerFullName 
+	FROM Employees AS e 
+	LEFT JOIN Employees AS m 
+		ON e.ManagerID = m.ManagerID 
+	ORDER BY EmployeeFullName
+
+13.) Problem 13.	Write a SQL query to find the names of all employees whose last name is exactly 5 characters long.
+SELECT (e.FirstName + ' ' + e.LastName) AS  EmployeeFullName
+	FROM Employees AS e  
+	WHERE LEN(e.LastName) = 5
+	ORDER BY EmployeeFullName
+	
+14.) Problem 14.	Write a SQL query to display the current date and time in the following format "day.month.year hour:minutes:seconds:milliseconds".
+-- Format: 2014-11-22 12:45:34.243
+SELECT GETDATE() AS CurrentDateTime
+-- Format: 27.02.2016 20:35:05:35
+SELECT FORMAT (GETDATE(), 'dd.MM.yyyy HH:mm:ss:mmm', 'en-US') AS DateConvert;
+
+15.) Problem 15.	Write a SQL statement to create a table Users.
+-- Users should have username, password, full name and last login time. Choose appropriate data types for the table fields. Define a primary key column with a primary key constraint. Define the primary key column as identity to facilitate inserting records. Define unique constraint to avoid repeating usernames. Define a check constraint to ensure the password is at least 5 characters long.
+CREATE TABLE Users (
+  UserID int IDENTITY,
+  UserName nvarchar(100) NOT NULL,
+  "Password" nvarchar(100) NOT NULL,
+  FirstName nvarchar(100) NOT NULL,
+  MiddleName nvarchar(100) NOT NULL,
+  LastName nvarchar(100) NOT NULL,
+  LastLoginTime datetime NOT NULL,
+  GroupID int NOT NULL,
+  CONSTRAINT PK_Users PRIMARY KEY(UserID)
+)
+ALTER TABLE Users ADD UNIQUE (UserName)
+
+16.) Problem 16.	Write a SQL statement to create a view that displays the users from the Users table that have been in the system today.
+SELECT UserName 
+FROM Users 
+WHERE LastLoginTime = CAST(GETDATE() AS DATE);
+
+17.) Problem 17.	Write a SQL statement to create a table Groups. 
+CREATE TABLE Groups (
+  GroupID int IDENTITY,
+  Name nvarchar(100) NOT NULL,
+  CONSTRAINT PK_Persons PRIMARY KEY(GroupID)
+)
+
+18.) Problem 18.	Write a SQL statement to add a column GroupID to the table Users. 
+ALTER TABLE Users ADD GroupID int
+
+19.) Problem 19.	Write SQL statements to insert several records in the Users and Groups tables.
+INSERT INTO Groups ("Name") 
+VALUES 
+('Sopi'),
+('Kofi'),
+('Lopati'),
+('Torbi'),
+('Vrati');
+USE [SoftUni]
+GO
+
+INSERT INTO [dbo].[Users]
+           ([UserName]
+           ,[Password]
+           ,[FirstName]
+           ,[MiddleName]
+           ,[LastName]
+           ,[LastLoginTime]
+           ,[GroupID])
+     VALUES
+           ('IvanLaskin1', 'aaaa', 'Ivan', 'M', 'Laskin', GETDATE(), 2), 
+           ('IvanLaskin2', 'aaaa', 'Ivan', 'M', 'Laskin', GETDATE(), 2), 
+           ('IvanLaskin3', 'aaaa', 'Ivan', 'M', 'Laskin', GETDATE(), 2), 
+           ('IvanLaskin4', 'aaaa', 'Ivan', 'M', 'Laskin', GETDATE(), 2), 
+           ('IvanLaskin5', 'aaaa', 'Ivan', 'M', 'Laskin', GETDATE(), 2) 
+GO
+
+20.) Problem 20.	Write SQL statements to update some of the records in the Users and Groups tables.
+USE [SoftUni]
+GO
+
+UPDATE [dbo].[Users]
+   SET [GroupID] = 3 
+ WHERE [UserName] = 'IvanLaskin2'
+GO
+USE [SoftUni]
+GO
+
+UPDATE [dbo].[Groups]
+   SET [Name] = 'Golemi Kofi'
+ WHERE [Name] = 'Kofi' 
+GO
+
+21.) Problem 21.	Write SQL statements to delete some of the records from the Users and Groups tables.
+DELETE FROM [dbo].[Users]
+      WHERE [UserID] > 9
+
+22.) Problem 22.	 Write SQL statements to insert in the Users table the names of all employees from the Employees table.
+SELECT CONCAT(UPPER(SUBSTRING([FirstName], 1, 1)), LOWER([LastName])) AS [UserName] 
+FROM Employees;
+INSERT INTO Users 
+	([UserName], [Password], [FirstName], [MiddleName], [LastName], [LastLoginTime], [GroupID]) 
+SELECT 
+	(SELECT CONCAT(UPPER(SUBSTRING([FirstName], 1, 1)), LOWER([LastName]))), 
+	(SELECT CONCAT(UPPER(SUBSTRING([FirstName], 1, 1)), LOWER([LastName]))), 
+	[FirstName], 
+	[MiddleName], 
+	[LastName], 
+	GETDATE(), 
+	FLOOR(RAND() * (50-1) + 1) AS [GroupID] 
+FROM Employees 
+WHERE [EmployeeID] IN (9, 10, 11, 12)
+
+23.) Problem 23.	Write a SQL statement that changes the password to NULL for all users that have not been in the system since 10.03.2010.
+UPDATE [dbo].[Users]
+   SET [Password] = NULL
+ WHERE [LastLoginTime] < '10.03.2010'
+
+24.) Problem 24.	Write a SQL statement that deletes all users without passwords (NULL password).
+DELETE FROM [dbo].[Users]
+      WHERE [Password] IS NULL
+	  
+25.) Problem 25.	
